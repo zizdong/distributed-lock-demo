@@ -19,7 +19,7 @@ public class StockController {
     public String sub(@PathVariable("productId") long productId,
                       @PathVariable("count") int count) {
         try {
-            Stock stock = stockService.subForRedis(productId, count);
+            Stock stock = stockService.subForWatchDog(productId, count);
             return String.format("商品：%d，数量:%d，扣减成功", productId, stock != null ? stock.getStock() : 0);
         } catch (Exception e) {
             log.error("商品：{}，数量:{}，扣减失败", productId, count);

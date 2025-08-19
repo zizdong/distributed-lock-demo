@@ -17,9 +17,9 @@ public class DistributedLock4Redis {
     @Resource
     private JedisPool jedisPool;
 
-    private Thread ownerThread = null;
+    protected Thread ownerThread = null;
 
-    private final static ThreadLocal<String> THREAD_LOCAL_THREAD = new ThreadLocal<>();
+    protected final static ThreadLocal<String> THREAD_LOCAL_THREAD = new ThreadLocal<>();
 
     private final static String RELEASE_LOCK_LUA_SCRIPT = "local value = redis.call('get', KEYS[1])\n" +
             "\n" +
@@ -81,7 +81,7 @@ public class DistributedLock4Redis {
             log.debug("Current thread id:{}", threadId);
             Object eval = jedis.eval(RELEASE_LOCK_LUA_SCRIPT, Arrays.asList(lockKey),
                     Arrays.asList(String.valueOf(threadId)));
-            log.debug("分布式锁:{}, 解锁结果:{}", lockKey, eval.toString());
+            log.info("分布式锁:{}, 解锁结果:{}", lockKey, eval.toString());
             if (-1 == (long) eval) {
                 log.error("分布式锁:{}, 不存在", lockKey);
                 return false;

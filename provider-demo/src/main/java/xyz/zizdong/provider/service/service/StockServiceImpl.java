@@ -11,6 +11,7 @@ import xyz.zizdong.provider.dao.StockMapper;
 import xyz.zizdong.provider.entity.Stock;
 import xyz.zizdong.provider.service.StockService;
 import xyz.zizdong.provider.utils.DistributedLock4Redis;
+import xyz.zizdong.provider.utils.DistributedLock4RedisWithWatchDog;
 
 import javax.annotation.Resource;
 import java.util.concurrent.locks.Lock;
@@ -32,8 +33,12 @@ public class StockServiceImpl implements StockService {
     @Resource
     private DistributedLock4Redis distributedLock4Redis;
 
+    @Resource
+    private DistributedLock4RedisWithWatchDog distributedLock4RedisWithWatchDog;
+
     @Override
-    public Stock sub(long productId, int count) {
+    public Stock sub(long productId, int count) throws InterruptedException {
+        Thread.sleep(15000);
         Stock stock = stockMapper.selectByProductId(productId);
         if (stock == null) {
             throw new RuntimeException("商品库存不足，没有初始化");
@@ -80,7 +85,17 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public Stock subForWatchDog(long productId, int count) {
-        return null;
+        try {
+            if (distributedLock4RedisWithWatchDog.tryLock("PRODUCT:STOCK:LOCK:" + productId, 30000)) {
+                return sub(productId, count);
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("扣减库存执行失败", e);
+            return null;
+        } finally {
+            distributedLock4RedisWithWatchDog.unlock("PRODUCT:STOCK:LOCK:" + productId);
+        }
     }
 
     @Override
