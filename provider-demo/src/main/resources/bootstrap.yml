@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_URL}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+      config:
+        server-addr: ${NACOS_URL}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        file-extension: yml
+        extension-configs:
+          - data-id: datasource.yml
+            refresh: true
+          - data-id: redis.yml
+            refresh: true
+  application:
+    name: provider-demo

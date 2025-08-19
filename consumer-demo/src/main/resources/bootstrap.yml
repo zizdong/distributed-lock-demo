@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_URL}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+      config:
+        server-addr: ${NACOS_URL}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        file-extension: yml
+  application:
+    name: consumer-demo
